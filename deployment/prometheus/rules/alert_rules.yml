@@ -1,0 +1,23 @@
+groups:
+  - name: bike-api-alerts
+    rules:
+      # 1) L'API ne répond plus
+      - alert: BikeApiDown
+        expr: up{job="bike_api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "L'API bike-sharing est injoignable."
+          description: "Le job 'bike_api' est DOWN depuis plus d'1 minute."
+
+      # 2) Le RMSE du modèle est trop élevé (performance dégradée / dérive)
+      #    -> c'est CETTE alerte que déclenche la cible 'make fire-alert' (/trigger-drift force rmse=9999)
+      - alert: ModelRmseHigh
+        expr: model_rmse_score > 300
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "RMSE du modèle trop élevé."
+          description: "model_rmse_score dépasse 300 depuis plus d'1 minute : le modèle se dégrade ou les données ont dérivé."
